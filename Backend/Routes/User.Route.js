@@ -6,24 +6,36 @@ const { UsersModule } = require("../Models/User.Model");
 usersRoute.get("/getdata", async (req, res) => {
   const category=req.query.category
   const name=req.query.name
-  try {
+  
     if(category || name){
-      const { page = 1, limit = 4 } = req.query;
+      try{
+        const { page = 1, limit = 4 } = req.query;
       const Data = await UsersModule.find({$or:[{"category":category},{"name":name}]}).limit(limit * 1)
       .skip((page - 1) * limit)
       res.send(Data);
+      }
+      catch (err) {
+        res.status(401).json({
+          message: "Something went wrong",
+        });
+      }
     }
     else{
-      const Data = await UsersModule.find().limit(limit * 1)
+      try{
+        const { page = 1, limit = 4 } = req.query;
+        const Data = await UsersModule.find().limit(limit * 1)
       .skip((page - 1) * limit);
     res.send(Data);
-    }
+      }
     
-  } catch (err) {
-    res.status(401).json({
-      message: "Something went wrong",
-    });
+    catch (err) {
+      res.status(401).json({
+        message: "Something went wrong",
+      });
+    }
   }
+    
+   
 });
 
 
@@ -44,7 +56,8 @@ usersRoute.delete("/delete/:id",async (req,res)=>{
   const id=req.params.id
   try{
       await UsersModule.findByIdAndDelete({"_id":id})
-      res.send("Delete Successful")
+      const Data=await UsersModule.find()
+      res.send(Data)
   }
   catch(err){
     res.status(401).json({
